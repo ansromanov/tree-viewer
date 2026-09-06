@@ -3,6 +3,10 @@
 `mantis` supports two kinds of plugins: **process plugins** (subprocess-based) and
 **syntax plugins** (syntax definitions loaded into the highlighter).
 
+The bundled `toml` and `css` process plugins provide folding for TOML tables and
+CSS-family rulesets. TOML syntax highlighting remains available through the
+bundled `toml-syntax` syntax plugin.
+
 Process plugins are standalone executables that hook into app events and issue
 actions back to the viewer. They run in separate processes; `mantis` talks to them
 over stdin/stdout using newline-delimited JSON, so a plugin can be any
@@ -62,7 +66,9 @@ Syntax plugins can also be registered explicitly in `mantis.toml` with
 
 ```toml
 [plugins]
-toml = { kind = "syntax", syntax_file = "syntaxes/toml.sublime-syntax",
+terraform = { kind = "syntax", syntax_file = "syntaxes/terraform.sublime-syntax",
+              extensions = ["tf", "tfvars"] }
+toml-syntax = { kind = "syntax", syntax_file = "syntaxes/toml.sublime-syntax",
          extensions = ["toml"] }
 typescript = { kind = "syntax", syntax_file = "syntaxes/typescript.sublime-syntax",
                extensions = ["ts", "tsx", "mts", "cts", "jsx"] }
@@ -170,7 +176,9 @@ compiled alongside `mantis` and installed on first run.
 | sh | `sh` | Registers as a language provider for `.sh`, `.bash`, and `.zsh` files with the `fold` capability. On file open, computes fold regions for function bodies and compound blocks, aware of `#` comments, quoted strings, and heredocs. |
 | yaml | `yaml` | Registers as a language provider for `.yaml`/`.yml` files with the `fold` capability. On file open, computes and registers collapsible indentation-based fold regions. When enabled, its regions take precedence over the built-in YAML folding. |
 | k8s | `k8s` | Registers as a language provider for `.yaml`/`.yml` files with the `status_facts` capability — coexists with the `yaml` plugin's `fold` registration on the same extensions since they declare different capabilities. On file open, heuristically detects Kubernetes manifests (`apiVersion:` + `kind:`) and reports the first resource's identity (`Kind/name (namespace)`) plus per-kind counts across `---`-separated documents (e.g. `Deployment/nginx (default) · 3 Deployments · 2 Services · 1 ConfigMap`) in the status bar. Files without both `apiVersion` and `kind` show no facts. |
-| terraform | `terraform` | Registers as a language provider for `.tf`, `.tfvars`, and `.hcl` files with the `fold` capability. On file open, computes fold regions for HCL blocks via the shared `hcl_brace_fold` detector, which is aware of `#`, `//`, and `/* */` comments, double-quoted strings, and heredocs. Highlighting for these files comes from the bundled `terraform.sublime-syntax`, auto-discovered from the `syntaxes/` directory. |
+| terraform | `terraform` | Registers as a language provider for `.tf`, `.tfvars`, and `.hcl` files with the `fold` capability. Folds HCL blocks using the shared Terraform detector. |
+| toml | `toml` | Registers as a language provider for `.toml` files with the `fold` capability. Folds TOML tables (`[table]`) and arrays of tables (`[[table]]`) through the next section or end of file. |
+| css | `css` | Registers as a language provider for `.css`, `.scss`, and `.less` files with the `fold` capability. Folds nested rulesets, media queries, and keyframes while ignoring comments and quoted strings. |
 
 ### Bundled syntax plugins
 
@@ -179,15 +187,12 @@ additional file types without spawning a subprocess.
 
 | Plugin | Extensions | What it highlights |
 |---|---|---|
-| toml | `.toml` | TOML configuration files (`Cargo.toml`, `mantis.toml`, `pyproject.toml`, etc.) |
+| terraform | `.tf`, `.tfvars` | HashiCorp Configuration Language (HCL) used by Terraform |
+| toml-syntax | `.toml` | TOML configuration files (`Cargo.toml`, `mantis.toml`, `pyproject.toml`, etc.) |
 | typescript | `.ts`, `.tsx`, `.mts`, `.cts`, `.jsx` | TypeScript and TSX (JSX) source files |
 | dockerfile | `Dockerfile`, `Containerfile` | Dockerfile instructions (matched by filename, no extension) |
 | nginx | `nginx.conf` | Nginx server configuration (matched by filename, no extension claim) |
 | justfile | `justfile` | Just (justfile) task recipes (matched by filename, no extension) |
-
-Terraform/HCL highlighting is handled by the same `terraform.sublime-syntax`
-file, but as an auto-discovered syntax definition rather than a `[plugins]`
-entry — see the `terraform` process plugin row above.
 
 All bundled plugins are compiled as workspace members and installed to the
 plugin directory the first time `mantis` creates its global config. They are all

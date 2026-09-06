@@ -1,8 +1,8 @@
 //! Build script for `mantis`.
 //!
 //! Compiles the bundled plugin crates (`iconize`,
-//! `markdown`, `python`, `rust`, `go`, `json`, `sh`, `yaml`, `k8s`,
-//! `terraform`), copies their binaries into `$OUT_DIR`, and
+//! `markdown`, `python`, `rust`, `go`, `json`, `sh`, `yaml`, `k8s`, `toml`,
+//! `css`), copies their binaries into `$OUT_DIR`, and
 //! generates `$OUT_DIR/plugin_binaries.rs` with `&[u8]` constants built via
 //! `include_bytes!`. This removes the search-path dance from
 //! `install_one_binary` and ensures bundled plugins are always available —
@@ -47,6 +47,8 @@ fn main() {
         "yaml",
         "k8s",
         "terraform",
+        "toml",
+        "css",
     ];
 
     if std::env::var("MANTIS_IN_PLUGIN_SUBBUILD").is_ok() {
@@ -116,10 +118,16 @@ fn main() {
         available.push(pkg);
 
         let mut cmd = Command::new(&cargo);
-        cmd.args(["build", "--package", pkg, "--target", &target_triple])
-            .arg("--target-dir")
-            .arg(&plugin_target)
-            .env("MANTIS_IN_PLUGIN_SUBBUILD", "1");
+        cmd.args([
+            "build",
+            "--manifest-path",
+            &format!("plugins/{pkg}/Cargo.toml"),
+            "--target",
+            &target_triple,
+        ])
+        .arg("--target-dir")
+        .arg(&plugin_target)
+        .env("MANTIS_IN_PLUGIN_SUBBUILD", "1");
         if is_release {
             cmd.arg("--release");
         }

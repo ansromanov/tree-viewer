@@ -27,6 +27,8 @@
 //!   non-blank line to the last line more indented than it. This is the
 //!   original built-in YAML fold algorithm; `crate::yaml_fold::detect_fold_regions`
 //!   re-exports it so existing call sites are unaffected.
+//! * `section_fold` — TOML table-section detector. A region spans from a
+//!   `[table]` or `[[array]]` header to the line before the next header.
 //!
 //! None of these functions know about `App`, plugins, or IPC — they are pure
 //! transformations to `Vec<FoldRegion>`.
@@ -78,6 +80,7 @@ fn brace_fold_impl(text: &str, track_brackets: bool) -> Vec<FoldRegion> {
         LineCmt,
         BlockCmt,
         DqStr,
+        SqStr,
         RawStr(usize),
         BtStr,
     }
@@ -121,6 +124,7 @@ fn brace_fold_impl(text: &str, track_brackets: bool) -> Vec<FoldRegion> {
                     _ => {}
                 },
                 b'"' => st = St::DqStr,
+                b'\'' => st = St::SqStr,
                 b'`' => st = St::BtStr,
                 b'r' => {
                     let prev_ident =
@@ -164,6 +168,13 @@ fn brace_fold_impl(text: &str, track_brackets: bool) -> Vec<FoldRegion> {
                     st = St::Normal;
                 } else if b == b'\n' {
                     line += 1;
+                }
+            }
+            St::SqStr => {
+                if b == b'\\' {
+                    i += 1;
+                } else if b == b'\'' {
+                    st = St::Normal;
                 }
             }
             St::RawStr(hashes) => {
@@ -694,6 +705,55 @@ pub fn indent_fold(text: &str) -> Vec<FoldRegion> {
     }
 
     regions
+}
+
+/// Detects foldable TOML table sections.
+///
+/// A section starts at a valid table header (`[table]`) or array-of-tables
+/// header (`[[table]]`) and extends through the line before the next header.
+/// Headers with trailing comments are accepted, while bracket-like text in
+/// values or comments is ignored because only the trimmed start of a line is
+/// considered. Single-line sections are omitted.
+pub fn section_fold(text: &str) -> Vec<FoldRegion> {
+    let lines: Vec<&str> = text.lines().collect();
+    let headers: Vec<usize> = lines
+        .iter()
+        .enumerate()
+        .filter_map(|(line, text)| is_toml_header(text).then_some(line))
+        .collect();
+
+    headers
+        .iter()
+        .enumerate()
+        .filter_map(|(index, &start)| {
+            let end = headers
+                .get(index + 1)
+                .copied()
+                .unwrap_or(lines.len())
+                .saturating_sub(1);
+            (end > start).then_some(FoldRegion { start, end })
+        })
+        .collect()
+}
+
+fn is_toml_header(line: &str) -> bool {
+    let trimmed = line
+        .split_once('#')
+        .map_or(line, |(before, _)| before)
+        .trim();
+    let Some(rest) = trimmed.strip_prefix('[') else {
+        return false;
+    };
+    let rest = rest.strip_prefix('[').unwrap_or(rest);
+    let closing = if trimmed.starts_with("[[") { "]]" } else { "]" };
+    let Some(header) = rest.strip_suffix(closing) else {
+        return false;
+    };
+    let header = header
+        .split_once('#')
+        .map_or(header, |(name, _)| name)
+        .trim();
+    !header.is_empty() && !header.contains('[') && !header.contains(']')
 }
 
 // ---------------------------------------------------------------------------
