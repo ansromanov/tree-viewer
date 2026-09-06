@@ -3,12 +3,7 @@
 # TypeScript/TSX syntax definition for syntect.
 # Covers both .ts/.mts/.cts and .tsx (JSX) files.
 name: TypeScript
-file_extensions:
-  - ts
-  - tsx
-  - mts
-  - cts
-  - jsx
+file_extensions: [ts, tsx, mts, cts, jsx, js, mjs, cjs]
 scope: source.ts
 
 contexts:

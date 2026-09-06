@@ -41,7 +41,7 @@ pub(crate) fn bundled_plugin_entries() -> Vec<(String, PluginEntry)> {
         // serialised verbatim into the user's `mantis.toml` on the first plugin
         // toggle, pinning a machine-specific home directory into a config that is
         // meant to be portable.
-        let enabled = true;
+        let enabled = *name != "typescript";
         entries.push((
             name.to_string(),
             PluginEntry {
@@ -111,6 +111,8 @@ pub(crate) const BUNDLED_PLUGINS: &[(&str, &str, &[u8])] = &[
     ("terraform", "terraform", TERRAFORM),
     ("toml", "toml", TOML),
     ("css", "css", CSS),
+    ("typescript", "typescript", TYPESCRIPT),
+    ("template", "template", TEMPLATE),
 ];
 
 /// Filenames of old shell-script plugins superseded by the current Rust binaries.
@@ -143,6 +145,10 @@ const BUNDLED_SYNTAX_PLUGINS: &[(&str, &str)] = &[
         include_str!("../../plugins/typescript/syntaxes/typescript.sublime-syntax"),
     ),
     (
+        "gotemplate.sublime-syntax",
+        include_str!("../../plugins/template/syntaxes/gotemplate.sublime-syntax"),
+    ),
+    (
         "dockerfile.sublime-syntax",
         include_str!("../../plugins/dockerfile/syntaxes/dockerfile.sublime-syntax"),
     ),
@@ -160,15 +166,20 @@ const BUNDLED_SYNTAX_PLUGINS: &[(&str, &str)] = &[
 /// Seeded into the config so syntax plugins appear in the plugin palette.
 const BUNDLED_SYNTAX_PLUGIN_ENTRIES: &[(&str, &str, &[&str])] = &[
     (
-        "terraform",
+        "terraform-syntax",
         "syntaxes/terraform.sublime-syntax",
         &["tf", "tfvars"],
     ),
     ("toml-syntax", "syntaxes/toml.sublime-syntax", &["toml"]),
     (
-        "typescript",
+        "typescript-syntax",
         "syntaxes/typescript.sublime-syntax",
-        &["ts", "tsx", "mts", "cts", "jsx"],
+        &["ts", "tsx", "mts", "cts", "jsx", "js", "mjs", "cjs"],
+    ),
+    (
+        "template-syntax",
+        "syntaxes/gotemplate.sublime-syntax",
+        &["tpl", "tmpl", "template", "j2", "jinja", "jinja2"],
     ),
     (
         "dockerfile",

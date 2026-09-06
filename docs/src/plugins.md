@@ -66,12 +66,12 @@ Syntax plugins can also be registered explicitly in `mantis.toml` with
 
 ```toml
 [plugins]
-terraform = { kind = "syntax", syntax_file = "syntaxes/terraform.sublime-syntax",
+terraform-syntax = { kind = "syntax", syntax_file = "syntaxes/terraform.sublime-syntax",
               extensions = ["tf", "tfvars"] }
 toml-syntax = { kind = "syntax", syntax_file = "syntaxes/toml.sublime-syntax",
          extensions = ["toml"] }
-typescript = { kind = "syntax", syntax_file = "syntaxes/typescript.sublime-syntax",
-               extensions = ["ts", "tsx", "mts", "cts", "jsx"] }
+typescript-syntax = { kind = "syntax", syntax_file = "syntaxes/typescript.sublime-syntax",
+                      extensions = ["ts", "tsx", "mts", "cts", "jsx", "js", "mjs", "cjs"] }
 dockerfile = { kind = "syntax", syntax_file = "syntaxes/dockerfile.sublime-syntax",
                extensions = ["dockerfile"] }
 nginx = { kind = "syntax", syntax_file = "syntaxes/nginx.sublime-syntax" }
@@ -179,6 +179,8 @@ compiled alongside `mantis` and installed on first run.
 | terraform | `terraform` | Registers as a language provider for `.tf`, `.tfvars`, and `.hcl` files with the `fold` capability. Folds HCL blocks using the shared Terraform detector. |
 | toml | `toml` | Registers as a language provider for `.toml` files with the `fold` capability. Folds TOML tables (`[table]`) and arrays of tables (`[[table]]`) through the next section or end of file. |
 | css | `css` | Registers as a language provider for `.css`, `.scss`, and `.less` files with the `fold` capability. Folds nested rulesets, media queries, and keyframes while ignoring comments and quoted strings. |
+| typescript | `typescript` | Registers as a language provider for TypeScript, TSX, JavaScript, and JSX extensions with the `fold` capability. Disabled by default because the existing syntax pack owns these extensions; enable it explicitly to add folding. |
+| template | `template` | Registers as a language provider for Go-template, Helm, and Jinja2 extensions with the `fold` capability. |
 
 ### Bundled syntax plugins
 
@@ -187,17 +189,19 @@ additional file types without spawning a subprocess.
 
 | Plugin | Extensions | What it highlights |
 |---|---|---|
-| terraform | `.tf`, `.tfvars` | HashiCorp Configuration Language (HCL) used by Terraform |
+| terraform-syntax | `.tf`, `.tfvars` | HashiCorp Configuration Language (HCL) used by Terraform |
 | toml-syntax | `.toml` | TOML configuration files (`Cargo.toml`, `mantis.toml`, `pyproject.toml`, etc.) |
-| typescript | `.ts`, `.tsx`, `.mts`, `.cts`, `.jsx` | TypeScript and TSX (JSX) source files |
+| typescript-syntax | `.ts`, `.tsx`, `.mts`, `.cts`, `.jsx`, `.js`, `.mjs`, `.cjs` | TypeScript, TSX, JavaScript, and JSX source files |
+| template-syntax | `.tpl`, `.tmpl`, `.template`, `.j2`, `.jinja`, `.jinja2` | Go-template, Helm, and Jinja2 templates |
 | dockerfile | `Dockerfile`, `Containerfile` | Dockerfile instructions (matched by filename, no extension) |
 | nginx | `nginx.conf` | Nginx server configuration (matched by filename, no extension claim) |
 | justfile | `justfile` | Just (justfile) task recipes (matched by filename, no extension) |
 
 All bundled plugins are compiled as workspace members and installed to the
-plugin directory the first time `mantis` creates its global config. They are all
-enabled by default. If you want to disable a bundled plugin, explicitly set
-`enabled = false` in your `mantis.toml`:
+plugin directory the first time `mantis` creates its global config. They are
+enabled by default, except the TypeScript/JavaScript folding provider, which is
+opt-in to avoid changing existing syntax-plugin behavior. Set `enabled = false`
+or `enabled = true` explicitly in your `mantis.toml` as needed:
 
 ```toml
 [plugins.rust]

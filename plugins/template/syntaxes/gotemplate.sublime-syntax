@@ -1,0 +1,17 @@
+%YAML 1.2
+---
+name: Go Template
+file_extensions: [tpl, tmpl, template, j2, jinja, jinja2]
+scope: source.gotemplate
+contexts:
+  main:
+    - match: '\{\{[-]?[\s\S]*?[-]?\}\}'
+      scope: meta.template.go
+      captures:
+        0: punctuation.section.embedded.begin.go
+    - match: '\{%[-]?[\s\S]*?[-]?%\}'
+      scope: meta.template.jinja
+    - match: '\{#[\s\S]*?#\}'
+      scope: comment.block.template
+    - match: '.+'
+      scope: source.embedded

@@ -49,6 +49,8 @@ fn main() {
         "terraform",
         "toml",
         "css",
+        "typescript",
+        "template",
     ];
 
     if std::env::var("MANTIS_IN_PLUGIN_SUBBUILD").is_ok() {

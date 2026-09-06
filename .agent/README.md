@@ -15,6 +15,14 @@ Each tool reads its own filenames here and ignores the rest:
 Project conventions live in [`../AGENTS.md`](../AGENTS.md), which both tools read from
 the repo root.
 
+## Worktree requirement
+
+Every agent and harness session must create and use a dedicated git worktree before
+editing, building, testing, committing, or pushing. Create it from a fresh remote
+default branch with `git worktree add .agent/worktrees/<branch-name> -b <branch-name>
+origin/main`, then run all work from that directory. Remove the worktree after the
+branch is merged or abandoned; keep the primary checkout untouched.
+
 ## Note on symlinks
 
 Git stores these as symlinks (mode `120000`). On Windows, `git config core.symlinks`
