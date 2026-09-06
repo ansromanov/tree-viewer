@@ -810,7 +810,7 @@ pub fn template_fold(text: &str) -> Vec<FoldRegion> {
 }
 
 fn is_template_open(word: &str, delimiter: &str) -> bool {
-    (delimiter == "{{" && matches!(word, "define" | "if" | "range" | "with"))
+    (delimiter == "{{" && matches!(word, "define" | "block" | "if" | "range" | "with"))
         || (delimiter == "{%" && matches!(word, "block" | "if" | "for" | "macro"))
 }
 

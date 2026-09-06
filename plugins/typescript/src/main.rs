@@ -2,7 +2,7 @@
 
 use std::io::{self, BufRead, Write};
 
-const EXTENSIONS: &[&str] = &["ts", "tsx", "js", "jsx", "mts", "mjs", "cjs"];
+const EXTENSIONS: &[&str] = &["ts", "tsx", "js", "jsx", "mts", "cts", "mjs", "cjs"];
 
 fn main() {
     let stdin = io::stdin();

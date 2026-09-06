@@ -228,6 +228,14 @@ fn template_fold_handles_nested_blocks_and_comments() {
 }
 
 #[test]
+fn template_fold_handles_go_block_directive() {
+    let regions = template_fold("{{ block \"title\" . }}\ncontent\n{{ end }}\n");
+    assert_eq!(regions.len(), 1);
+    assert_eq!(regions[0].start, 0);
+    assert_eq!(regions[0].end, 2);
+}
+
+#[test]
 fn brace_fold_backtick_newline() {
     let r = brace_fold(
         "\

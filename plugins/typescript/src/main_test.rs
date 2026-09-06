@@ -6,6 +6,7 @@ fn registers_typescript_and_javascript_extensions() {
     register_language_provider(&mut output);
     let msg: serde_json::Value = serde_json::from_slice(&output).unwrap();
     assert_eq!(msg["params"]["extensions"], serde_json::json!(EXTENSIONS));
+    assert!(EXTENSIONS.contains(&"cts"));
     assert_eq!(msg["params"]["capabilities"][0], "fold");
 }
 
