@@ -95,31 +95,23 @@ Each new scrollable overlay is a prompt to check whether the ad hoc
 graduate into a shared `ScrollState`-style helper (see AGENTS.md →
 Consistency & performance) rather than being copied a third time.
 
-### 5. Language intelligence (Rust · Python · Go)
-*Epic: [#482](https://github.com/ansromanov/mantis/issues/482)*
+### 5. Language & format intelligence
+*Epic: [#602](https://github.com/ansromanov/mantis/issues/602) (absorbing #482 & #485); [Roadmap Spec](superpowers/specs/2026-09-06-language-and-format-coverage-roadmap.md)*
 
-Syntax highlighting already covers these; this pillar adds language-*aware*
-reading, built in and zero-config like the shipped YAML folding:
+Language smarts and format viewing are delivered via the v3 plugin architecture and shared core detectors (`fold_detectors`):
 
-- **Code folding** for Rust/Go (brace-based) and Python (indentation-based) —
-  starter issue [#483](https://github.com/ansromanov/mantis/issues/483).
-- **Symbol outline / go-to-symbol** fuzzy picker (regex-based, deliberately
-  not tree-sitter — binary size is a feature).
+- **Code folding** across core languages (Rust, Go, Python, Shell, JSON, YAML shipped; TypeScript/JS, Terraform/HCL, INI/Systemd, SQL, PowerShell, Templates next).
+- **Symbol outline / go-to-symbol** fuzzy picker (regex-based heuristics in core, surfaced via provider capability).
 - **Scope context in the breadcrumb**, which also feeds sticky scroll
   ([#199](https://github.com/ansromanov/mantis/issues/199)).
+- **Per-language statusbar facts** (protocol shipped in 0.18.x with `plugins/k8s`; language fact summaries next).
 
 ### 6. File-type coverage via plugins
-*Epic: [#485](https://github.com/ansromanov/mantis/issues/485)*
+*Epic: [#602](https://github.com/ansromanov/mantis/issues/602)*
 
-Beyond the three built-in languages, coverage grows through plugins in two
-tiers. **Syntax packs** (`.sublime-syntax`, terraform-style): TOML,
-TypeScript/TSX, and Dockerfile bundled first
-([#486](https://github.com/ansromanov/mantis/issues/486)), then
-Protobuf/GraphQL/Jinja2/nginx and friends via the registry. **Rich viewers**
-(process plugins): a Jupyter `.ipynb` renderer and a GGUF/safetensors
-model-metadata viewer headline the AI persona; Parquet/SQLite previews and a
-PEM/JWT decoder serve DevOps. Rich viewers are blocked on the 64 KB plugin
-content cap ([#449](https://github.com/ansromanov/mantis/issues/449)).
+Coverage expands through bundled and registry plugins in two tiers:
+- **Syntax packs** (`.sublime-syntax`): TOML, TypeScript/TSX, Dockerfile, Nginx, Justfile, Terraform bundled; PowerShell and Jinja2/Go-template next.
+- **Rich viewers** (process plugins): Markdown shipped; SQLite/DB and CSV/TSV table views ([#71](https://github.com/ansromanov/mantis/issues/71)) planned following the 64 KB plugin buffer enhancement ([#449](https://github.com/ansromanov/mantis/issues/449)).
 
 ### Cross-cutting: plugin system hardening
 
