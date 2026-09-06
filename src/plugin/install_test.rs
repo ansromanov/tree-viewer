@@ -96,6 +96,8 @@ fn bundled_plugin_entries_all_enabled_by_default() {
     assert!(names.contains(&"json"), "json plugin must be listed");
     assert!(names.contains(&"sh"), "sh plugin must be listed");
     assert!(names.contains(&"yaml"), "yaml plugin must be listed");
+    assert!(names.contains(&"ini"), "ini plugin must be listed");
+    assert!(names.contains(&"sql"), "sql plugin must be listed");
     assert!(names.contains(&"k8s"), "k8s plugin must be listed");
     assert!(
         names.contains(&"terraform"),

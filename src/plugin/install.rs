@@ -5,7 +5,7 @@
 //! installs syntax definitions into `{plugin_dir}/syntaxes/`.
 //!
 //! Bundled binary plugins (`iconize`, `markdown`, `python`, `rust`, `go`,
-//! `json`, `sh`, `yaml`, `toml`, `css`) are embedded at compile time via `build.rs` →
+//! `json`, `sh`, `yaml`, `toml`, `css`, `ini`, `sql`) are embedded at compile time via `build.rs` →
 //! `$OUT_DIR/plugin_binaries.rs` — no search-path dance or fallback `cargo
 //! build` at runtime. This ensures they are always available for non-source
 //! installs (release artifacts, Homebrew, etc.).
@@ -24,7 +24,7 @@ use crate::plugin::types::{PluginEntry, PluginKind};
 ///
 /// All plugins shipped with `mantis` (markdown, iconize, python, rust, go, json, sh,
 /// yaml, k8s, toml, css, terraform, toml-syntax, typescript, dockerfile, nginx,
-/// justfile) are enabled by
+/// justfile, ini, sql) are enabled by
 /// default. User config
 /// entries with `or_insert` always win over these defaults, so an explicit
 /// `enabled = false` in `mantis.toml` is respected.
@@ -111,6 +111,8 @@ pub(crate) const BUNDLED_PLUGINS: &[(&str, &str, &[u8])] = &[
     ("terraform", "terraform", TERRAFORM),
     ("toml", "toml", TOML),
     ("css", "css", CSS),
+    ("ini", "ini", INI),
+    ("sql", "sql", SQL),
 ];
 
 /// Filenames of old shell-script plugins superseded by the current Rust binaries.

@@ -217,6 +217,75 @@ fn section_fold_handles_tables_and_comments() {
 }
 
 #[test]
+fn section_fold_ignores_trailing_blank_lines_and_comments() {
+    let regions = section_fold(
+        "[Unit]\nDescription=demo\n\n# trailing\n; also trailing\n[Service]\nExecStart=demo\n",
+    );
+    assert_eq!(
+        regions.iter().map(|r| (r.start, r.end)).collect::<Vec<_>>(),
+        vec![(0, 1), (5, 6)]
+    );
+}
+
+#[test]
+fn section_fold_omits_empty_and_single_line_sections() {
+    assert!(section_fold("[empty]\n\n[one]\n").is_empty());
+}
+
+#[test]
+fn sql_fold_detects_statements_and_nested_blocks() {
+    let regions = sql_fold(
+        "WITH active AS (\n  SELECT id FROM users\n)\nSELECT * FROM active;\n\nBEGIN\n  IF ready THEN\n    CASE WHEN ok THEN SELECT 1; END CASE;\n  END IF;\nEND;\n",
+    );
+    let ranges: Vec<_> = regions
+        .iter()
+        .map(|region| (region.start, region.end))
+        .collect();
+    assert!(ranges.contains(&(0, 3)));
+    assert_eq!(ranges, vec![(0, 3), (6, 8), (5, 9)]);
+    assert!(ranges.contains(&(6, 8)));
+}
+
+#[test]
+fn sql_fold_handles_create_table_and_comments_strings() {
+    let regions = sql_fold(
+        "-- BEGIN;\nCREATE TABLE users (\n  note TEXT DEFAULT 'END; BEGIN',\n  name TEXT /* CASE END; */\n);\n",
+    );
+    assert_eq!(
+        regions
+            .iter()
+            .map(|region| (region.start, region.end))
+            .collect::<Vec<_>>(),
+        vec![(1, 4)]
+    );
+}
+
+#[test]
+fn sql_fold_keeps_create_function_together_across_body_statements() {
+    let regions = sql_fold(
+        "CREATE FUNCTION work()\nRETURNS void AS\nBEGIN\n  INSERT INTO audit VALUES (1);\nEND;\n",
+    );
+    let ranges: Vec<_> = regions
+        .iter()
+        .map(|region| (region.start, region.end))
+        .collect();
+    assert_eq!(ranges, vec![(2, 4), (0, 4)]);
+}
+
+#[test]
+fn sql_fold_supports_tsql_and_plpgsql_end_forms() {
+    let regions =
+        sql_fold("IF @ready = 1\nBEGIN\n  SELECT 1;\nEND\n\nLOOP\n  SELECT 2;\nEND LOOP;\n");
+    let ranges: Vec<_> = regions
+        .iter()
+        .map(|region| (region.start, region.end))
+        .collect();
+    assert_eq!(ranges, vec![(1, 3), (0, 3), (5, 7)]);
+    assert!(ranges.contains(&(0, 3)));
+    assert!(ranges.contains(&(5, 7)));
+}
+
+#[test]
 fn brace_fold_backtick_newline() {
     let r = brace_fold(
         "\

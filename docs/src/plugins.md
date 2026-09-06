@@ -179,6 +179,8 @@ compiled alongside `mantis` and installed on first run.
 | terraform | `terraform` | Registers as a language provider for `.tf`, `.tfvars`, and `.hcl` files with the `fold` capability. Folds HCL blocks using the shared Terraform detector. |
 | toml | `toml` | Registers as a language provider for `.toml` files with the `fold` capability. Folds TOML tables (`[table]`) and arrays of tables (`[[table]]`) through the next section or end of file. |
 | css | `css` | Registers as a language provider for `.css`, `.scss`, and `.less` files with the `fold` capability. Folds nested rulesets, media queries, and keyframes while ignoring comments and quoted strings. |
+| ini | `ini` | Registers as a language provider for `.ini`, `.service`, `.timer`, `.conf`, `.properties`, `.cfg`, and `.desktop` files. Folds INI/Systemd sections through their last meaningful line. |
+| sql | `sql` | Registers as a language provider for `.sql` files. Folds multiline semicolon-terminated statements and common `BEGIN`, `CASE`, `IF`, and `LOOP` blocks while ignoring comments and quoted strings. |
 
 ### Bundled syntax plugins
 

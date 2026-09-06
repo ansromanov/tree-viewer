@@ -1,0 +1,11 @@
+[package]
+name = "ini"
+version = "0.1.0"
+edition = "2021"
+description = "Bundled INI language provider plugin for mantis."
+license = "GPL-3.0-or-later"
+repository = "https://github.com/ansromanov/mantis"
+
+[dependencies]
+mantis = { path = "../.." }
+serde_json = "1"
