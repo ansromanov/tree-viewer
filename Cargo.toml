@@ -9,6 +9,7 @@ members = [
     "plugins/sh",
     "plugins/yaml",
     "plugins/k8s",
+    "plugins/terraform",
 ]
 resolver = "2"
 

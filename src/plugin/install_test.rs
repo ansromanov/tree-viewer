@@ -68,7 +68,7 @@ fn bundled_plugin_entries_all_enabled_by_default() {
     assert!(names.contains(&"go"), "go plugin must be listed");
     assert!(
         names.contains(&"terraform"),
-        "terraform syntax plugin must be listed"
+        "terraform language provider plugin must be listed"
     );
     assert!(names.contains(&"toml"), "toml syntax plugin must be listed");
     assert!(
@@ -100,8 +100,7 @@ fn bundled_plugin_entries_all_enabled_by_default() {
     }
     // Process entries
     for (name, entry) in &entries {
-        if name == "terraform"
-            || name == "toml"
+        if name == "toml"
             || name == "typescript"
             || name == "dockerfile"
             || name == "nginx"
@@ -246,6 +245,15 @@ fn install_bundled_plugins_creates_iconize_binary() {
     assert!(
         plugins_dir.join(markdown_name).exists(),
         "markdown binary must be installed"
+    );
+    let terraform_name = if cfg!(windows) {
+        "terraform.exe"
+    } else {
+        "terraform"
+    };
+    assert!(
+        plugins_dir.join(terraform_name).exists(),
+        "terraform binary must be installed"
     );
     std::fs::remove_dir_all(&tmp).ok();
 }

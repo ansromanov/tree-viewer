@@ -138,7 +138,7 @@ fn app_new_show_hidden_includes_dotfiles() {
 fn app_new_registers_syntax_plugins_in_manager_for_palette() {
     // init.rs hands *all* plugin entries (including syntax-kind) to the
     // PluginManager so they surface in the plugin palette; the bundled
-    // terraform syntax plugin is seeded into the config by default.
+    // toml syntax plugin is seeded into the config by default.
     let root = temp_dir();
     let app = new_app(&root, Config::default());
     let entries = app.plugin_manager.plugin_entries();

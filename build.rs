@@ -1,7 +1,8 @@
 //! Build script for `mantis`.
 //!
 //! Compiles the bundled plugin crates (`iconize`,
-//! `markdown`, `python`, `rust`, `go`, `json`, `sh`, `yaml`, `k8s`), copies their binaries into `$OUT_DIR`, and
+//! `markdown`, `python`, `rust`, `go`, `json`, `sh`, `yaml`, `k8s`,
+//! `terraform`), copies their binaries into `$OUT_DIR`, and
 //! generates `$OUT_DIR/plugin_binaries.rs` with `&[u8]` constants built via
 //! `include_bytes!`. This removes the search-path dance from
 //! `install_one_binary` and ensures bundled plugins are always available —
@@ -36,7 +37,16 @@ use std::process::Command;
 
 fn main() {
     let plugins = &[
-        "iconize", "markdown", "python", "rust", "go", "json", "sh", "yaml", "k8s",
+        "iconize",
+        "markdown",
+        "python",
+        "rust",
+        "go",
+        "json",
+        "sh",
+        "yaml",
+        "k8s",
+        "terraform",
     ];
 
     if std::env::var("MANTIS_IN_PLUGIN_SUBBUILD").is_ok() {

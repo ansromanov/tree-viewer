@@ -39,7 +39,7 @@ An audit of real-world multi-repo environments identified that backend, DevOps, 
 | **Markdown** | `.md` | ✅ Syntect built-in | ❌ (Plain text) | `plugins/markdown` | Shipped (Rich ANSI viewer) |
 | **TypeScript / TSX / JSX** | `.ts`, `.tsx`, `.jsx`, `.mts` | ✅ Bundled syntax pack | 💤 Planned (`brace_fold`) | `plugins/typescript` | Tracked |
 | **JavaScript** | `.js`, `.mjs`, `.cjs` | ✅ Syntect built-in | 💤 Planned (`brace_fold`) | `plugins/typescript` / `plugins/javascript` | Tracked |
-| **Terraform & HCL** | `.tf`, `.tfvars`, `.hcl` | ✅ Bundled `.tf` (add `.hcl`) | 💤 Planned (`brace_fold`) | `plugins/terraform` | Tracked |
+| **Terraform & HCL** | `.tf`, `.tfvars`, `.hcl` | ✅ Bundled `.tf` + `.hcl` | ✅ `hcl_brace_fold` | `plugins/terraform` | Shipped (#782) |
 | **INI & Systemd** | `.ini`, `.service`, `.timer`, `.conf`, `.properties` | ✅ Syntect built-in | 💤 Planned (`section_fold`) | `plugins/ini` | Tracked |
 | **SQL** | `.sql` | ✅ Syntect built-in | 💤 Planned (`sql_fold`) | `plugins/sql` | Tracked |
 | **PowerShell** | `.ps1`, `.psm1`, `.powershell` | 💤 Needs `.sublime-syntax` | 💤 Planned (`brace_fold`) | `plugins/powershell` | Tracked |

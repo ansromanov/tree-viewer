@@ -5,14 +5,20 @@
 //! installs syntax definitions into `{plugin_dir}/syntaxes/`.
 //!
 //! Bundled binary plugins (`iconize`, `markdown`, `python`, `rust`, `go`,
-//! `json`, `sh`, `yaml`) are embedded at compile time via `build.rs` →
+//! `json`, `sh`, `yaml`, `terraform`) are embedded at compile time via
+//! `build.rs` →
 //! `$OUT_DIR/plugin_binaries.rs` — no search-path dance or fallback `cargo
 //! build` at runtime. This ensures they are always available for non-source
 //! installs (release artifacts, Homebrew, etc.).
 //!
-//! Bundled syntax plugins (`terraform`, `toml`, `typescript`, `dockerfile`,
+//! Bundled syntax plugins (`toml`, `typescript`, `dockerfile`,
 //! `nginx`, `justfile`) are embedded via `include_str!` and written to the
-//! `syntaxes/` subdirectory on first run.
+//! `syntaxes/` subdirectory on first run. The matching
+//! `terraform.sublime-syntax` ships the same way, but it declares its own
+//! `file_extensions` (`.tf`, `.tfvars`, `.hcl`) and is auto-discovered from
+//! `{plugin_dir}/syntaxes/` rather than being managed by a `[plugins]`
+//! entry — the `terraform` plugin itself is a process plugin (language
+//! provider, `fold` capability).
 
 include!(concat!(env!("OUT_DIR"), "/plugin_binaries.rs"));
 
@@ -107,6 +113,7 @@ pub(crate) const BUNDLED_PLUGINS: &[(&str, &str, &[u8])] = &[
     ("sh", "sh", SH),
     ("yaml", "yaml", YAML),
     ("k8s", "k8s", K8S),
+    ("terraform", "terraform", TERRAFORM),
 ];
 
 /// Filenames of old shell-script plugins superseded by the current Rust binaries.
@@ -154,12 +161,12 @@ const BUNDLED_SYNTAX_PLUGINS: &[(&str, &str)] = &[
 
 /// List of (name, syntax_rel_path, extensions) for syntax plugin [plugins] entries.
 /// Seeded into the config so syntax plugins appear in the plugin palette.
+///
+/// `terraform` is deliberately absent: its `.sublime-syntax` is still installed
+/// (see `BUNDLED_SYNTAX_PLUGINS`) but is auto-discovered from `{plugin_dir}/syntaxes/`
+/// rather than managed by a config entry, and the `terraform` plugin itself is a
+/// process language provider (fold capability) registered in `BUNDLED_PLUGINS`.
 const BUNDLED_SYNTAX_PLUGIN_ENTRIES: &[(&str, &str, &[&str])] = &[
-    (
-        "terraform",
-        "syntaxes/terraform.sublime-syntax",
-        &["tf", "tfvars"],
-    ),
     ("toml", "syntaxes/toml.sublime-syntax", &["toml"]),
     (
         "typescript",

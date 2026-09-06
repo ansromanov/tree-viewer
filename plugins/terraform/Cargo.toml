@@ -1,0 +1,11 @@
+[package]
+name = "terraform"
+version = "0.1.0"
+edition = "2021"
+description = "Bundled Terraform/HCL language provider plugin for mantis. Registers fold capability for .tf, .tfvars and .hcl files via the shared hcl_brace_fold detector."
+license = "GPL-3.0-or-later"
+repository = "https://github.com/ansromanov/mantis"
+
+[dependencies]
+mantis = { path = "../.." }
+serde_json = "1"

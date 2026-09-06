@@ -363,6 +363,10 @@ Objects and arrays in `.json` files can be folded the same way, via the bundled
 `json` plugin (also opt-in). It folds against the pretty-printed view below, so
 regions line up whether or not the file was originally minified.
 
+Terraform / HCL files (`.tf`, `.tfvars`, `.hcl`) fold via the bundled
+`terraform` language provider plugin, which detects HCL blocks while ignoring
+`#`/`//`/`/* */` comments, quoted strings, and heredocs.
+
 ## JSON pretty-printing
 
 Viewing a JSON file? Use the command palette (`Ctrl+P` → "Toggle JSON

@@ -657,16 +657,14 @@ define the matching rules.
 
 `mantis` ships with a `terraform.sublime-syntax` file that is automatically
 installed to `{plugin_dir}/syntaxes/` on first run. It provides syntax
-highlighting for `.tf` and `.tfvars` files (Terraform / HCL). Enable it by:
+highlighting for `.tf`, `.tfvars`, and `.hcl` files (Terraform / HCL).
 
-```toml
-[plugins]
-terraform = { kind = "syntax", syntax_file = "syntaxes/terraform.sublime-syntax",
-              extensions = ["tf", "tfvars"] }
-```
-
-Or simply leave it in the `syntaxes/` directory for auto-discovery (no config
-entry needed).
+The terraform syntax is **auto-discovered**: because it lives in the
+`syntaxes/` directory and is not tied to a `[plugins]` entry, it is loaded
+unconditionally. Folding for the same extensions is provided separately by
+the bundled `terraform` **process** plugin, which registers the `fold`
+capability via `register_language_provider` and answers `on_file_open`
+using the shared `mantis::fold_detectors::hcl_brace_fold` detector.
 
 ### Architecture notes
 

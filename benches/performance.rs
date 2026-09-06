@@ -653,6 +653,46 @@ fn bench_brace_fold_with_brackets(c: &mut Criterion) {
     group.finish();
 }
 
+// ---------------------------------------------------------------------------
+// Benchmark: hcl_brace_fold — synthetic Terraform with resources, blocks,
+// comments, strings, and heredocs
+// ---------------------------------------------------------------------------
+
+fn generate_hcl_source(line_count: usize) -> String {
+    let mut content = String::with_capacity(line_count * 40);
+    // A resource block for every 12 lines
+    for chunk in 0..line_count / 12 {
+        content.push_str(&format!("resource \"aws_instance\" \"box_{chunk}\" {{\n"));
+        for i in 0..11 {
+            match i % 4 {
+                0 => content.push_str(&format!("    ami         = \"ami-{i}\"\n")),
+                1 => content.push_str(&format!("    count       = {i}\n")),
+                2 => content.push_str("    # comment with }\n"),
+                _ => content.push_str("    user_data = <<-EOF\n      echo hi\n    EOF\n"),
+            }
+        }
+        content.push_str("}\n\n");
+    }
+    // Tail: a top-level variable block plus an unterminated closing brace to
+    // exercise unbalanced-input handling.
+    if !line_count.is_multiple_of(12) {
+        content.push_str("variable \"tail\" {\n  type = string\n}\n");
+    }
+    content.push_str("}\n");
+    content
+}
+
+fn bench_hcl_brace_fold(c: &mut Criterion) {
+    let mut group = c.benchmark_group("hcl_brace_fold");
+    for &lines in &[100, 1_000, 10_000] {
+        let src = generate_hcl_source(lines);
+        group.bench_with_input(BenchmarkId::new("hcl_brace_fold", lines), &src, |b, src| {
+            b.iter(|| black_box(mantis::fold_detectors::hcl_brace_fold(black_box(src))))
+        });
+    }
+    group.finish();
+}
+
 fn bench_telemetry_overhead(c: &mut Criterion) {
     let mut group = c.benchmark_group("telemetry_overhead");
 
@@ -700,6 +740,7 @@ criterion_group!(
     bench_brace_fold,
     bench_indent_fold,
     bench_brace_fold_with_brackets,
+    bench_hcl_brace_fold,
     bench_telemetry_overhead,
 );
 
