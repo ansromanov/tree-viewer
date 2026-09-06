@@ -12,6 +12,7 @@
 //! these read accessors.
 
 use super::App;
+use unicode_width::UnicodeWidthStr;
 
 impl App {
     /// Returns the total number of lines in the current content source
@@ -80,6 +81,13 @@ impl App {
 
     /// Returns the display width of line `index` in terminal columns.
     pub fn line_width(&self, index: usize) -> Option<usize> {
+        if let Some(path) = &self.current_file {
+            if let Some(lines) = self.plugin_content.get(path) {
+                return lines
+                    .get(index)
+                    .map(|spans| spans.iter().map(|(_, text)| text.width()).sum());
+            }
+        }
         if let Some(vf) = &self.virtual_file {
             vf.line_width(index)
         } else {
