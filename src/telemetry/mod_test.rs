@@ -185,6 +185,7 @@ fn events_contain_only_whitelisted_keys() {
         "file_line_ending",
         "file_syntax",
         "file_is_json",
+        "file_is_csv",
         "file_is_diff",
         "file_uses_mmap",
         "theme",
