@@ -217,6 +217,17 @@ fn section_fold_handles_tables_and_comments() {
 }
 
 #[test]
+fn template_fold_handles_nested_blocks_and_comments() {
+    let r = template_fold(
+        "{{ define \"x\" }}\n{{ if .Enabled }}\n{{/* {{ end }} */}}\nvalue\n{{ end }}\n{{ end }}\n",
+    );
+    assert_eq!(
+        r.iter().map(|x| (x.start, x.end)).collect::<Vec<_>>(),
+        vec![(1, 4), (0, 5)]
+    );
+}
+
+#[test]
 fn brace_fold_backtick_newline() {
     let r = brace_fold(
         "\

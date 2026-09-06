@@ -68,6 +68,10 @@ fn bundled_plugin_entries_all_enabled_by_default() {
     assert!(names.contains(&"go"), "go plugin must be listed");
     assert!(
         names.contains(&"terraform"),
+        "terraform plugin must be listed"
+    );
+    assert!(
+        names.contains(&"terraform-syntax"),
         "terraform syntax plugin must be listed"
     );
     assert!(names.contains(&"toml"), "toml fold plugin must be listed");
@@ -76,6 +80,18 @@ fn bundled_plugin_entries_all_enabled_by_default() {
         "toml syntax plugin must be listed"
     );
     assert!(names.contains(&"css"), "css plugin must be listed");
+    assert!(
+        names.contains(&"template"),
+        "template plugin must be listed"
+    );
+    assert!(
+        names.contains(&"typescript-syntax"),
+        "typescript syntax plugin must be listed"
+    );
+    assert!(
+        names.contains(&"template-syntax"),
+        "template syntax plugin must be listed"
+    );
     assert!(
         names.contains(&"typescript"),
         "typescript syntax plugin must be listed"
@@ -103,14 +119,22 @@ fn bundled_plugin_entries_all_enabled_by_default() {
     );
     for (name, entry) in &entries {
         assert!(
-            entry.enabled,
-            "bundled plugin {name} must default to enabled=true"
+            entry.enabled || name == "typescript",
+            "bundled plugin {name} must default to enabled=true unless opt-in"
         );
     }
+    let typescript = entries
+        .iter()
+        .find(|(name, _)| name == "typescript")
+        .map(|(_, entry)| entry)
+        .expect("typescript plugin must be present");
+    assert!(!typescript.enabled, "typescript folding must be opt-in");
     // Process entries
     for (name, entry) in &entries {
-        if name == "toml-syntax"
-            || name == "typescript"
+        if name == "terraform-syntax"
+            || name == "toml-syntax"
+            || name == "typescript-syntax"
+            || name == "template-syntax"
             || name == "dockerfile"
             || name == "nginx"
             || name == "justfile"

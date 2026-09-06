@@ -12,6 +12,8 @@ members = [
     "plugins/terraform",
     "plugins/toml",
     "plugins/css",
+    "plugins/typescript",
+    "plugins/template",
 ]
 resolver = "2"
 

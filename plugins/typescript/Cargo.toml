@@ -1,0 +1,11 @@
+[package]
+name = "typescript"
+version = "0.1.0"
+edition = "2021"
+description = "Bundled TypeScript and JavaScript language provider plugin for mantis."
+license = "GPL-3.0-or-later"
+repository = "https://github.com/ansromanov/mantis"
+
+[dependencies]
+mantis = { path = "../.." }
+serde_json = "1"
