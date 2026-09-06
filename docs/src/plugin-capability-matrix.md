@@ -14,7 +14,7 @@ routes them via `PluginManager::provider_for` (`src/plugin/manager.rs`).
 
 | Capability | Declared in protocol | Handled by host | Used by a bundled plugin |
 |---|---|---|---|
-| `fold` | yes | yes — gates `set_fold_regions` in `handle_plugin_set_fold_regions` (`src/app/refresh.rs`) | **yes** — used by the bundled `rust`, `go`, `python`, `json`, `sh`, and `yaml` language provider plugins |
+| `fold` | yes | yes — gates `set_fold_regions` in `handle_plugin_set_fold_regions` (`src/app/refresh.rs`) | **yes** — used by the bundled `rust`, `go`, `python`, `json`, `sh`, `yaml`, and `terraform` language provider plugins |
 | `status_facts` | yes (0.18.x) | yes — gates `set_status_facts` in `handle_plugin_set_status_facts` (`src/app/refresh.rs`) | **yes** — used by the bundled `k8s` plugin, coexisting with `yaml`'s `fold` registration on the same `.yaml`/`.yml` extensions |
 | `highlight` | yes | **no** — accepted at registration, never checked anywhere | no |
 | `hover` | yes (reserved) | no — unimplementable in v2 (no request/response correlation) | no |
@@ -23,7 +23,8 @@ routes them via `PluginManager::provider_for` (`src/plugin/manager.rs`).
 
 Note on `highlight`: real syntax highlighting flows through **syntax plugins**
 (`kind = "syntax"`, a `.sublime-syntax` file fed to syntect — see the bundled
-`terraform` plugin), not through language-provider capabilities. The
+`toml`/`typescript`/`dockerfile`/`nginx`/`justfile` plugins), not through
+language-provider capabilities. The
 `highlight` capability is documented as reserved for future provider-driven
 highlighting; today registering it has no effect.
 
@@ -64,7 +65,7 @@ version history in [Plugin Development](plugin-development.md) only.
 | `sh` | process | `register_language_provider`, `set_fold_regions` | `fold` |
 | `yaml` | process | `register_language_provider`, `set_fold_regions` | `fold` |
 | `k8s` | process | `register_language_provider`, `set_status_facts` | `status_facts` |
-| `terraform` | syntax | none (no subprocess) | n/a — extends syntect directly |
+| `terraform` | process | `register_language_provider`, `set_fold_regions` | `fold` |
 
 ## Gaps and follow-ups
 
@@ -75,8 +76,8 @@ version history in [Plugin Development](plugin-development.md) only.
 2. **The language-provider fold pipeline has bundled consumers** —
    `register_language_provider` + `Capability::Fold` + `set_fold_regions` are
    used by the bundled `rust` (issue #599), `go` (issue #600), `python`
-   (issue #601), `json` (issue #604), `sh` (issue #605), and `yaml`
-   (issue #603) language
+   (issue #601), `json` (issue #604), `sh` (issue #605), `yaml`
+   (issue #603), and `terraform` (issue #782) language
    provider plugins. The `rust` and `go` plugins register the `fold`
    capability for `.rs` and `.go` files via the shared `brace_fold` detector
    (#598); the `python` plugin uses the shared `indent_fold` detector; the
@@ -86,7 +87,10 @@ version history in [Plugin Development](plugin-development.md) only.
    quoted strings, and heredocs; the `yaml` plugin uses the shared `yaml_fold`
    detector — the same algorithm the built-in
    `crate::yaml_fold::detect_fold_regions` re-exports, so plugin-enabled and
-   built-in YAML folding agree. Built-in YAML folding (`compute_file_load` in
+   built-in YAML folding agree; the `terraform` plugin uses `hcl_brace_fold`,
+   an HCL-specific variant that handles `#`/`//`/`/* */` comments,
+   double-quoted strings, and heredocs for `.tf`, `.tfvars`, and `.hcl`
+   files. Built-in YAML folding (`compute_file_load` in
    `src/app/loader.rs`) is unchanged in this phase — it still dispatches to
    `yaml_fold::detect_fold_regions` directly, and the plugin's regions only
    take over when the plugin is enabled (existing override precedence in

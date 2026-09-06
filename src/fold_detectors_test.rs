@@ -1034,6 +1034,152 @@ foo() {
 }
 
 // ---------------------------------------------------------------------------
+// hcl_brace_fold tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn hcl_brace_fold_empty() {
+    assert!(hcl_brace_fold("").is_empty());
+}
+
+#[test]
+fn hcl_brace_fold_no_braces() {
+    assert!(hcl_brace_fold("ami = \"ami-12345\"\n").is_empty());
+}
+
+#[test]
+fn hcl_brace_fold_single_line_block() {
+    // Single-line {…} — no region (must span >1 line).
+    assert!(hcl_brace_fold("provider \"aws\" { region = \"us-east-1\" }\n").is_empty());
+}
+
+#[test]
+fn hcl_brace_fold_nested_resource_blocks() {
+    let r = hcl_brace_fold(
+        "\
+resource \"aws_instance\" \"web\" {
+  ami           = \"ami-12345\"
+  instance_type = \"t2.micro\"
+
+  tags = {
+    Name = \"web\"
+  }
+}
+",
+    );
+    assert_eq!(r.len(), 2);
+    // Inner tags block closes first.
+    assert_eq!(r[0].start, 4);
+    assert_eq!(r[0].end, 6);
+    // Outer resource block closes last.
+    assert_eq!(r[1].start, 0);
+    assert_eq!(r[1].end, 7);
+}
+
+#[test]
+fn hcl_brace_fold_skips_hash_comment() {
+    // Braces inside `#` comments must not be treated as fold boundaries.
+    let r = hcl_brace_fold(
+        "\
+resource \"aws_instance\" \"web\" {
+  # startup script body { not a block }
+  ami = \"ami-12345\"
+}
+",
+    );
+    assert_eq!(r.len(), 1);
+    assert_eq!(r[0].start, 0);
+    assert_eq!(r[0].end, 3);
+}
+
+#[test]
+fn hcl_brace_fold_skips_slash_comment() {
+    let r = hcl_brace_fold(
+        "\
+resource \"aws_instance\" \"web\" {
+  // { ignored }
+  ami = \"ami-12345\"
+}
+",
+    );
+    assert_eq!(r.len(), 1);
+    assert_eq!(r[0].start, 0);
+    assert_eq!(r[0].end, 3);
+}
+
+#[test]
+fn hcl_brace_fold_skips_block_comment() {
+    let r = hcl_brace_fold(
+        "\
+resource \"aws_instance\" \"web\" {
+  /*
+    { nested brace in block comment }
+  */
+  ami = \"ami-12345\"
+}
+",
+    );
+    assert_eq!(r.len(), 1);
+    assert_eq!(r[0].start, 0);
+    assert_eq!(r[0].end, 5);
+}
+
+#[test]
+fn hcl_brace_fold_skips_double_quoted_string() {
+    // HCL string interpolation carries braces inside the quotes.
+    let r = hcl_brace_fold(
+        "\
+resource \"aws_bucket\" \"logs\" {
+  name = \"logs-${var.env}-{not-a-block}\"
+}
+",
+    );
+    assert_eq!(r.len(), 1);
+    assert_eq!(r[0].start, 0);
+    assert_eq!(r[0].end, 2);
+}
+
+#[test]
+fn hcl_brace_fold_skips_heredoc() {
+    let r = hcl_brace_fold(
+        "\
+resource \"aws_instance\" \"web\" {
+  user_data = <<-EOF
+    #!/bin/bash
+    echo \"{ not a block }\"
+    for i in {1..3}; do echo $i; done
+  EOF
+}
+",
+    );
+    assert_eq!(r.len(), 1);
+    assert_eq!(r[0].start, 0);
+    assert_eq!(r[0].end, 6);
+}
+
+#[test]
+fn hcl_brace_fold_skips_quoted_delimiter_heredoc() {
+    let r = hcl_brace_fold(
+        "\
+locals {
+  script = <<\"EOT\"
+value = { \"ignored\": true }
+EOT
+}
+",
+    );
+    assert_eq!(r.len(), 1);
+    assert_eq!(r[0].start, 0);
+    assert_eq!(r[0].end, 4);
+}
+
+#[test]
+fn hcl_brace_fold_unclosed_brace() {
+    let r = hcl_brace_fold("resource \"x\" \"y\" {\n  count = 1\n");
+    assert!(r.is_empty());
+}
+
+// ---------------------------------------------------------------------------
 // yaml_fold tests
 // ---------------------------------------------------------------------------
 

@@ -15,6 +15,10 @@
 //!   pairs, skipping braces inside `#` line comments, single-quoted strings
 //!   (no escape processing), double-quoted strings (`\"` escapes), and
 //!   heredocs (`<<WORD … WORD`).
+//! * `hcl_brace_fold` — HCL-specific brace detector.  Matches `{`/`}`
+//!   pairs, skipping braces inside `#`, `//`, and `/* … */` comments,
+//!   double-quoted strings (`\"` escapes), and HCL heredocs
+//!   (`<<EOF`, `<<'EOF'`, `<<"EOF"`, `<<-EOF`).
 //! * `indent_fold` — Python-style indentation detector.  A region spans from
 //!   each compound-statement header (`def`/`class`/`if`/`for`/`while`/etc.) to
 //!   the last more-indented line.  Continuation keywords (`else`/`elif`/
@@ -356,6 +360,174 @@ pub fn shell_brace_fold(text: &str) -> Vec<FoldRegion> {
                         let mut start = after_nl;
                         if heredoc_allow_indent {
                             while start < len && bytes[start] == b'\t' {
+                                start += 1;
+                            }
+                        }
+                        let avail = len - start;
+                        if avail >= heredoc_delim.len() {
+                            let mut matches = true;
+                            for (j, &d) in heredoc_delim.iter().enumerate() {
+                                if bytes[start + j] != d {
+                                    matches = false;
+                                    break;
+                                }
+                            }
+                            if matches {
+                                let after_delim = start + heredoc_delim.len();
+                                if after_delim >= len
+                                    || bytes[after_delim] == b'\n'
+                                    || bytes[after_delim] == b'\r'
+                                {
+                                    st = St::Normal;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        i += 1;
+    }
+
+    regions
+}
+
+// ---------------------------------------------------------------------------
+// HCL brace-nesting detector
+// ---------------------------------------------------------------------------
+
+/// Detects foldable regions in HashiCorp Configuration Language (HCL) files —
+/// Terraform, TFLint, OpenBao, Nomad, Consul.
+///
+/// Like [`brace_fold`], walks `text` character by character maintaining a
+/// nesting stack for `{…}` pairs, but uses HCL-specific syntax rules:
+///
+/// * Line comments (`# …` and `// …`)
+/// * Block comments (`/* … */`)
+/// * Double-quoted strings (`"…"` with `\"` escapes)
+/// * Heredocs (`<<WORD`, `<<'WORD'`, `<<"WORD"`, `<<-WORD` … `WORD` — braces
+///   inside are inert)
+///
+/// Returns one region per `{…}` block that spans more than one line.
+pub fn hcl_brace_fold(text: &str) -> Vec<FoldRegion> {
+    let bytes = text.as_bytes();
+    let len = bytes.len();
+    if len == 0 {
+        return Vec::new();
+    }
+
+    #[derive(Clone, Copy, PartialEq, Eq)]
+    enum St {
+        Normal,
+        LineCmt,
+        BlockCmt,
+        DqStr,
+        Heredoc,
+    }
+
+    let mut st = St::Normal;
+    let mut line = 0usize;
+    let mut stack: Vec<usize> = Vec::new();
+    let mut regions: Vec<FoldRegion> = Vec::new();
+    let mut heredoc_delim: Vec<u8> = Vec::new();
+    // Only <<- heredocs allow (tab) indentation before the closing delimiter.
+    let mut heredoc_allow_indent = false;
+    let mut i = 0;
+
+    while i < len {
+        let b = bytes[i];
+        match st {
+            St::Normal => match b {
+                b'\n' => line += 1,
+                b'{' => stack.push(line),
+                b'}' => {
+                    if let Some(start) = stack.pop() {
+                        if line > start {
+                            regions.push(FoldRegion { start, end: line });
+                        }
+                    }
+                }
+                // `#` and `//` start a comment that runs to end of line.
+                b'#' => st = St::LineCmt,
+                b'/' if i + 1 < len && bytes[i + 1] == b'/' => {
+                    st = St::LineCmt;
+                    i += 1;
+                }
+                b'/' if i + 1 < len && bytes[i + 1] == b'*' => {
+                    st = St::BlockCmt;
+                    i += 1;
+                }
+                b'"' => st = St::DqStr,
+                b'<' if i + 1 < len && bytes[i + 1] == b'<' => {
+                    i += 1;
+                    let dash = i + 1 < len && bytes[i + 1] == b'-';
+                    if dash {
+                        i += 1;
+                    }
+                    i += 1;
+                    while i < len && (bytes[i] == b' ' || bytes[i] == b'\t') {
+                        i += 1;
+                    }
+                    let word_start = i;
+                    while i < len && bytes[i] != b'\n' && bytes[i] != b' ' && bytes[i] != b'\t' {
+                        i += 1;
+                    }
+                    // Strip quoting from the delimiter word: <<'EOF' and
+                    // <<"EOF" both terminate on a bare EOF line.
+                    let mut word = &bytes[word_start..i];
+                    if word.len() >= 2
+                        && (word[0] == b'\'' || word[0] == b'"')
+                        && word[word.len() - 1] == word[0]
+                    {
+                        word = &word[1..word.len() - 1];
+                    }
+                    if !word.is_empty() {
+                        heredoc_delim.clear();
+                        heredoc_delim.extend_from_slice(word);
+                        heredoc_allow_indent = dash;
+                        st = St::Heredoc;
+                        continue;
+                    }
+                }
+                _ => {}
+            },
+            St::LineCmt => {
+                if b == b'\n' {
+                    st = St::Normal;
+                    line += 1;
+                }
+            }
+            St::BlockCmt => {
+                if b == b'\n' {
+                    line += 1;
+                } else if b == b'*' && i + 1 < len && bytes[i + 1] == b'/' {
+                    st = St::Normal;
+                    i += 1;
+                }
+            }
+            St::DqStr => {
+                if b == b'\\' && i + 1 < len {
+                    if bytes[i + 1] == b'\n' {
+                        line += 1;
+                    }
+                    i += 1;
+                } else if b == b'"' {
+                    st = St::Normal;
+                } else if b == b'\n' {
+                    line += 1;
+                }
+            }
+            St::Heredoc => {
+                if b == b'\n' {
+                    line += 1;
+                    let after_nl = i + 1;
+                    let remaining = len - after_nl;
+                    if remaining >= heredoc_delim.len() {
+                        // Only <<- strips leading whitespace before the
+                        // delimiter; a plain << delimiter must start the line.
+                        let mut start = after_nl;
+                        if heredoc_allow_indent {
+                            while start < len && (bytes[start] == b'\t' || bytes[start] == b' ') {
                                 start += 1;
                             }
                         }

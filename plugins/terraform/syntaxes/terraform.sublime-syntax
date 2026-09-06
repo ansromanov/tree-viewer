@@ -6,6 +6,7 @@ name: Terraform (HCL)
 file_extensions:
   - tf
   - tfvars
+  - hcl
 scope: source.hcl.terraform
 
 contexts:

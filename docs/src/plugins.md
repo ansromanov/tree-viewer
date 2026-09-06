@@ -62,8 +62,6 @@ Syntax plugins can also be registered explicitly in `mantis.toml` with
 
 ```toml
 [plugins]
-terraform = { kind = "syntax", syntax_file = "syntaxes/terraform.sublime-syntax",
-              extensions = ["tf", "tfvars"] }
 toml = { kind = "syntax", syntax_file = "syntaxes/toml.sublime-syntax",
          extensions = ["toml"] }
 typescript = { kind = "syntax", syntax_file = "syntaxes/typescript.sublime-syntax",
@@ -172,6 +170,7 @@ compiled alongside `mantis` and installed on first run.
 | sh | `sh` | Registers as a language provider for `.sh`, `.bash`, and `.zsh` files with the `fold` capability. On file open, computes fold regions for function bodies and compound blocks, aware of `#` comments, quoted strings, and heredocs. |
 | yaml | `yaml` | Registers as a language provider for `.yaml`/`.yml` files with the `fold` capability. On file open, computes and registers collapsible indentation-based fold regions. When enabled, its regions take precedence over the built-in YAML folding. |
 | k8s | `k8s` | Registers as a language provider for `.yaml`/`.yml` files with the `status_facts` capability — coexists with the `yaml` plugin's `fold` registration on the same extensions since they declare different capabilities. On file open, heuristically detects Kubernetes manifests (`apiVersion:` + `kind:`) and reports the first resource's identity (`Kind/name (namespace)`) plus per-kind counts across `---`-separated documents (e.g. `Deployment/nginx (default) · 3 Deployments · 2 Services · 1 ConfigMap`) in the status bar. Files without both `apiVersion` and `kind` show no facts. |
+| terraform | `terraform` | Registers as a language provider for `.tf`, `.tfvars`, and `.hcl` files with the `fold` capability. On file open, computes fold regions for HCL blocks via the shared `hcl_brace_fold` detector, which is aware of `#`, `//`, and `/* */` comments, double-quoted strings, and heredocs. Highlighting for these files comes from the bundled `terraform.sublime-syntax`, auto-discovered from the `syntaxes/` directory. |
 
 ### Bundled syntax plugins
 
@@ -180,12 +179,15 @@ additional file types without spawning a subprocess.
 
 | Plugin | Extensions | What it highlights |
 |---|---|---|
-| terraform | `.tf`, `.tfvars` | HashiCorp Configuration Language (HCL) used by Terraform |
 | toml | `.toml` | TOML configuration files (`Cargo.toml`, `mantis.toml`, `pyproject.toml`, etc.) |
 | typescript | `.ts`, `.tsx`, `.mts`, `.cts`, `.jsx` | TypeScript and TSX (JSX) source files |
 | dockerfile | `Dockerfile`, `Containerfile` | Dockerfile instructions (matched by filename, no extension) |
 | nginx | `nginx.conf` | Nginx server configuration (matched by filename, no extension claim) |
 | justfile | `justfile` | Just (justfile) task recipes (matched by filename, no extension) |
+
+Terraform/HCL highlighting is handled by the same `terraform.sublime-syntax`
+file, but as an auto-discovered syntax definition rather than a `[plugins]`
+entry — see the `terraform` process plugin row above.
 
 All bundled plugins are compiled as workspace members and installed to the
 plugin directory the first time `mantis` creates its global config. They are all

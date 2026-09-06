@@ -100,7 +100,7 @@ Consistency & performance) rather than being copied a third time.
 
 Language smarts and format viewing are delivered via the v3 plugin architecture and shared core detectors (`fold_detectors`):
 
-- **Code folding** across core languages (Rust, Go, Python, Shell, JSON, YAML shipped; TypeScript/JS, Terraform/HCL, INI/Systemd, SQL, PowerShell, Templates next).
+- **Code folding** across core languages (Rust, Go, Python, Shell, JSON, YAML, Terraform/HCL shipped; TypeScript/JS, INI/Systemd, SQL, PowerShell, Templates next).
 - **Symbol outline / go-to-symbol** fuzzy picker (regex-based heuristics in core, surfaced via provider capability).
 - **Scope context in the breadcrumb**, which also feeds sticky scroll
   ([#199](https://github.com/ansromanov/mantis/issues/199)).
