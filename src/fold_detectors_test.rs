@@ -198,6 +198,25 @@ func foo() {
 }
 
 #[test]
+fn brace_fold_skips_single_quoted_string() {
+    let r = brace_fold(".icon {\n  content: '}' ;\n}\n");
+    assert_eq!(r.len(), 1);
+    assert_eq!(r[0].start, 0);
+    assert_eq!(r[0].end, 2);
+}
+
+#[test]
+fn section_fold_handles_tables_and_comments() {
+    let r = section_fold(
+        "title = \"demo\"\n[package] # metadata\nname = \"x\"\n[[bin]]\nname = \"x\"\n",
+    );
+    assert_eq!(
+        r.iter().map(|x| (x.start, x.end)).collect::<Vec<_>>(),
+        vec![(1, 2), (3, 4)]
+    );
+}
+
+#[test]
 fn brace_fold_backtick_newline() {
     let r = brace_fold(
         "\

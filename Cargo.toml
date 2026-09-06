@@ -10,6 +10,8 @@ members = [
     "plugins/yaml",
     "plugins/k8s",
     "plugins/terraform",
+    "plugins/toml",
+    "plugins/css",
 ]
 resolver = "2"
 
