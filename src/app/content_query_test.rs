@@ -211,3 +211,22 @@ fn jsonl_display_rebuild_keeps_path_map_aligned() {
         .any(|p| p == ".spec.image"));
     fs::remove_dir_all(&root).ok();
 }
+
+#[test]
+fn line_width_uses_rendered_plugin_lines_over_virtual_file() {
+    let root = temp_root();
+    let mut app = app_for(&root);
+    let path = root.join("doc.md");
+    app.current_file = Some(path.clone());
+    app.virtual_file = crate::virtual_file::VirtualFile::open(&path);
+    app.plugin_content.insert(
+        path,
+        vec![vec![(
+            Style::default(),
+            "rendered markdown line".to_string(),
+        )]],
+    );
+
+    assert_eq!(app.line_width(0), Some("rendered markdown line".len()));
+    fs::remove_dir_all(&root).ok();
+}

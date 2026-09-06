@@ -408,7 +408,15 @@ pub(crate) fn draw_content(f: &mut Frame, app: &mut App, area: Rect) {
     // When there is no gutter (ln_width == 0) but word-wrap is on, fall back to
     // ratatui's built-in Wrap — there is no drift risk without a parallel gutter
     // paragraph, so the pre-expansion path is skipped and ratatui handles it.
-    let mut para = Paragraph::new(content_lines).scroll((0, hscroll));
+    // `content_scroll` is measured in visual rows when wrapping is enabled.
+    // The first logical line can therefore be partially visible; pass its
+    // intra-line offset to ratatui when there is no gutter to pre-expand.
+    let wrap_scroll = if app.word_wrap && ln_width == 0 {
+        leading_rows as u16
+    } else {
+        0
+    };
+    let mut para = Paragraph::new(content_lines).scroll((wrap_scroll, hscroll));
     if app.word_wrap && ln_width == 0 {
         para = para.wrap(Wrap { trim: false });
     }

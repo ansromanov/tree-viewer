@@ -58,6 +58,37 @@ fn wrapped_draw_handles_a_long_single_line() {
 }
 
 #[test]
+fn wrapped_plugin_content_scrolls_by_visual_row() {
+    let root = temp_tree();
+    let mut app = app_for(&root);
+    let path = root.join("readme.md");
+    let chars: String = (0..80).map(|i| char::from(b'a' + (i % 26) as u8)).collect();
+    let rendered = format!("{chars}{chars}");
+    app.current_file = Some(path.clone());
+    app.plugin_content.insert(
+        path.clone(),
+        vec![vec![(ratatui::style::Style::default(), rendered.clone())]],
+    );
+    app.plugin_content_text.insert(path, vec![rendered]);
+    app.word_wrap = true;
+
+    let backend = TestBackend::new(20, 6);
+    let mut terminal = ratatui::Terminal::new(backend).unwrap();
+    terminal
+        .draw(|frame| draw_content(frame, &mut app, frame.area()))
+        .unwrap();
+    app.set_content_scroll(1);
+    terminal
+        .draw(|frame| draw_content(frame, &mut app, frame.area()))
+        .unwrap();
+
+    // The first content row is the second wrapped row (18 columns wide inside
+    // the bordered pane), not the first row of the logical markdown line.
+    assert_eq!(terminal.backend().buffer()[(1, 1)].symbol(), "s");
+    fs::remove_dir_all(&root).ok();
+}
+
+#[test]
 fn active_line_saturates_at_last_line() {
     let root = temp_tree();
     let mut app = app_for(&root);
