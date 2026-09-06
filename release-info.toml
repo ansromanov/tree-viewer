@@ -1,27 +1,16 @@
-version = "0.18.12"
+version = "0.19.0"
 date = "2026-09-06"
-whats_new = """- feat: follow the newest changed file (#753)
-- feat: add git worktree switcher (#755)
-- feat: render JSONL rows with in-place expansion (#754)
-- fix: improve keymap discoverability (#752)
-- fix: use friendly labels for palette-only help entries (#751)
-- fix: discard line filters on escape (#750)
-- fix: show blame mode in status bar (#748)
-- fix: keep search navigation keys typeable (#746)
-- fix: close blame commit views with one escape (#749)
-- fix: keep git mode visible in content focus (#747)
-- fix: restore tree expansion after filtering (#745)
-- fix: correct tree label and history diffs (#743)
-- docs: align e2e keymaps with defaults (#744)
-- fix: handle narrow terminals clearly (#731)
-- fix: clarify scroll and cursor indicators (#730)
-- fix: make piped stdin pager interactive (#728)
-- feat: add nginx.conf / justfile syntax highlighting (#742)
-- fix: keep scrollbar drags out of text selection (#729)
-- feat: add right-click context menu for tree rows and content pane (#720)
-- fix: stabilize mouse content scrolling (#714)
-- fix: ci: gate auto-merge behind a label instead of default-on (#712)
-- docs: mandate git worktrees for all agents in AGENTS.md (#713)
-- feat: implement log follow mode and line filtering (#711)
-- chore: bump Homebrew formula to v0.17.10 [skip ci]"""
-release_url = "https://github.com/ansromanov/mantis/releases/tag/v0.18.0"
+whats_new = """- test: update release test expectations (#790)
+- fix: scroll wrapped markdown by visual rows (#781)
+- docs: add language and format coverage roadmap spec (#602) (#789)
+- feat: harden plugin registry trust model (#780)
+- feat: add per-workspace file bookmarks (#775)
+- feat: render images inline via the Kitty graphics protocol (#774)
+- feat: expose cursor line to selection-change plugins (#772)
+- feat: show real image dimensions in the binary-file placeholder (#773)
+- feat: status_facts plugin capability + bundled k8s manifest plugin (#771)
+- Fix wrapped scrolling and transient view state (#769)
+- feat: add JSON path breadcrumb and query bar (#758)
+- fix(plugin): ensure safe default plugin installation and sparse config saving (#768)
+- chore: bump Homebrew formula to v0.18.0 [skip ci]"""
+release_url = "https://github.com/ansromanov/mantis/releases/tag/v0.19.0"
