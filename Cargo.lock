@@ -1039,7 +1039,7 @@ dependencies = [
 
 [[package]]
 name = "mantis"
-version = "0.19.1"
+version = "0.19.2"
 dependencies = [
  "anyhow",
  "arboard",
