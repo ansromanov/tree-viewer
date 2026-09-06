@@ -130,9 +130,14 @@ fn to_markdown_lists_all_sections() {
     let app = app_for(tmp.path());
     let md = DiagnosticReport::collect(&app).to_markdown();
     for needle in [
-        "- **app**:",
+        "- **app version**:",
+        "- **target**:",
+        "- **release date**:",
         "- **os**:",
+        "- **arch**:",
+        "- **wsl**:",
         "- **terminal**:",
+        "- **size**:",
         "- **workspace**:",
         "- **open file**:",
         "- **theme**:",
