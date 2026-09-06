@@ -339,9 +339,9 @@ Key pages to consider when changing code:
 
 ## Worktrees (mandatory for all agents)
 
-**Every AI agent working in this repo — Claude Code, Codex, opencode, Kilo Code,
-Antigravity, or any other — must do its work in a dedicated git worktree, never
-directly in the primary checkout.** This keeps parallel agent sessions (and parallel
+**Mandatory, with no exceptions: every agent or harness working in this repo — Claude Code,
+Codex, opencode, Kilo Code, Antigravity, or any other — must do its work in a dedicated git
+worktree, never directly in the primary checkout.** This keeps parallel agent sessions (and parallel
 tasks within one session) from clobbering each other's edits or switching the branch
 out from under a running build/test.
 
